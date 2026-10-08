@@ -6,8 +6,8 @@
    · 三个字段都用普通字符串；要写引号请用 \" 或改用 '…' 包住整串 */
 window.PAPER_DATA = window.PAPER_DATA || {};
 window.PAPER_DATA['p-1'] = {
-  title:   '拓扑绝缘体表面态的输运性质（占位标题）',
-  date:    '2026-05-07',
-  summary: '占位摘要：简述这篇论文研究了什么问题、用了什么方法、得到什么结论。建议控制在两三行以内。',
-  meta:    '占位作者 · arXiv:2605.xxxxx'
+  title:   '线性代数讲义',
+  date:    '2026-10-08',
+  summary: '适用于量子力学的初等线性代数讲义',
+  meta:    'KngJack'
 };
