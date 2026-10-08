@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>KngJack的个人主页</title>
+  <meta name="description" content="KngJack 的个人主页">
+
+  <!-- 主题（深色 / 浅色）初始化：要在样式表之前跑，避免刷新时闪一下白 -->
+  <script>
+    (function () {
+      var theme = 'dark';
+      try {
+        var saved = localStorage.getItem('theme');
+        if (saved === 'light' || saved === 'dark') theme = saved;
+      } catch (e) {}
+      document.documentElement.setAttribute('data-theme', theme);
+    })();
+  </script>
+
+  <link rel="stylesheet" href="style.css">
+</head>
+
+<body data-page="home">
+
+  <!-- 背景两层：一层放图（assets/bg-home.jpg），一层压暗加模糊 -->
+  <div class="bg-image" aria-hidden="true"></div>
+  <div class="bg-overlay" aria-hidden="true"></div>
+
+  <header class="site-header">
+    <div class="header-inner">
+      <a class="site-title" href="index.html">KngJack的个人主页</a>
+
+      <div class="header-right">
+        <nav class="site-nav">
+          <a href="index.html" class="active" aria-current="page">首页<span class="nav-dot" aria-hidden="true"></span></a>
+          <a href="papers.html">论文</a>
+          <a href="essays.html">随笔</a>
+          <a href="photowall.html">照片墙</a>
+          <a href="moments.html">说说</a>
+          <a href="about.html">关于</a>
+        </nav>
+
+        <button class="theme-toggle" type="button"
+                aria-label="切换到浅色模式" title="切换到浅色模式">
+          <svg class="icon-sun" viewBox="0 0 24 24" aria-hidden="true">
+            <circle cx="12" cy="12" r="5"/>
+            <line x1="12" y1="1"  x2="12" y2="3"/>
+            <line x1="12" y1="21" x2="12" y2="23"/>
+            <line x1="4.22" y1="4.22"   x2="5.64" y2="5.64"/>
+            <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/>
+            <line x1="1" y1="12" x2="3"  y2="12"/>
+            <line x1="21" y1="12" x2="23" y2="12"/>
+            <line x1="4.22" y1="19.78"  x2="5.64" y2="18.36"/>
+            <line x1="18.36" y1="5.64"  x2="19.78" y2="4.22"/>
+          </svg>
+          <svg class="icon-moon" viewBox="0 0 24 24" aria-hidden="true">
+            <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>
+          </svg>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <main class="page">
+
+    <!-- ============ 个人卡片 ============
+         上半：头像 + 名字 + 简介（名字/头像来自 profile.js）
+         下半：左边统计、右下角小日历（手机上自动变成上下排列） -->
+    <section class="glass-card profile-card">
+
+      <div class="profile-top">
+        <div class="avatar-wrap">
+          <!-- 头像地址不写在这里，由下面脚本从 profile.js 读取
+               （这样换头像只改 profile.js 一处；没读到文件时是一块白底，不会出现裂图） -->
+          <img id="owner-avatar" alt="头像">
+        </div>
+        <div class="profile-info">
+          <!-- 名字与简介：名字由 profile.js 填；简介默认用这里的文字，
+               若 profile.js 里写了 desc 字段，则优先用它的 -->
+          <h1 class="profile-name" id="owner-name">KngJack</h1>
+          <p class="profile-desc" id="owner-desc">凝聚态物理学生，喜欢数学。对于弦论和场论及其背后的数学结构很感兴趣。</p>
+        </div>
+      </div>
+
+      <!-- 底部一行：左边统计，右下角日历 -->
+      <div class="profile-bottom">
+
+        <div class="stats">
+          <div class="stat stat-1">
+            <div class="stat-num">0</div>
+            <div class="stat-label">论文</div>
+          </div>
+          <div class="stat-divider" aria-hidden="true"></div>
+          <div class="stat stat-2">
+            <div class="stat-num">1</div>
+            <div class="stat-label">随笔</div>
+          </div>
+          <div class="stat-divider" aria-hidden="true"></div>
+          <div class="stat stat-3">
+            <div class="stat-num">3</div>
+            <div class="stat-label">照片</div>
+          </div>
+        </div>
+
+        <!-- 小日历：这里只写"骨架"，月份和日期由页面底部的脚本填进去；
+             不想要日历，就把这一整块连同底部那段脚本一起删掉 -->
+        <div class="mini-calendar" id="mini-calendar">
+          <div class="cal-head">
+            <button class="cal-nav" id="cal-prev" type="button" aria-label="上一个月">‹</button>
+            <span class="cal-title" id="cal-title"></span>
+            <button class="cal-nav" id="cal-next" type="button" aria-label="下一个月">›</button>
+          </div>
+          <div class="cal-weekdays" id="cal-weekdays"></div>
+          <div class="cal-grid" id="cal-grid"></div>
+        </div>
+
+      </div>
+
+    </section>
+
+  </main>
+
+  <script src="script.js"></script>
+  <script src="profile.js"></script>
+
+  <!-- ================================================================
+       把 profile.js 里的个人资料填进卡片
+       ----------------------------------------------------------------
+       · owner.name   → 名字（必填）
+       · owner.avatar → 头像地址（如 assets/avatar.jpg）
+       · owner.desc   → 简介；没写就用 HTML 里那句占位文字
+       · 没读到 profile.js 时：名字保留 HTML 里的文字、头像处是一块白底（不是裂图）
+       ================================================================ -->
+  <script>
+    (function () {
+      var owner = window.SITE_OWNER || {};
+
+      var nameEl   = document.getElementById('owner-name');
+      var descEl   = document.getElementById('owner-desc');
+      var avatarEl = document.getElementById('owner-avatar');
+
+      if (nameEl && owner.name) nameEl.textContent = owner.name;
+      if (descEl && owner.desc) descEl.textContent = owner.desc;
+
+      if (avatarEl && owner.avatar) {
+        avatarEl.src = owner.avatar;
+        avatarEl.alt = owner.name || '头像';
+      }
+    })();
+  </script>
+
+  <!-- ================================================================
+       首页右下角的小日历
+       ----------------------------------------------------------------
+       · 纯静态页面里算出来的公历月历，不依赖任何外部文件、不联网；
+       · 显示今天所在的月份，今天高亮；点 ‹ › 翻月（跨年自动进位）；
+       · 想整体放大/缩小：改 style.css 里 .mini-calendar 的 width
+         和 .cal-day 的 height / 字号；
+       · 想删掉日历：把上面的 .mini-calendar 整块和这段脚本一起删掉。
+       ================================================================ -->
+  <script>
+    (function () {
+      'use strict';
+
+      /* ===== 可以改的两行 ===== */
+      var WEEK_START  = 0;    // 0 = 周日排在一周开头；想让周一开头，改成 1
+      var WEEK_LABELS = ['日', '一', '二', '三', '四', '五', '六'];
+
+      var titleEl    = document.getElementById('cal-title');
+      var weekdaysEl = document.getElementById('cal-weekdays');
+      var gridEl     = document.getElementById('cal-grid');
+      var prevBtn    = document.getElementById('cal-prev');
+      var nextBtn    = document.getElementById('cal-next');
+
+      // 页面上没有日历（比如你把它删了）就安静跳过，不报错
+      if (!titleEl || !weekdaysEl || !gridEl || !prevBtn || !nextBtn) return;
+
+      var today     = new Date();           // 只取一次：页面开着跨过午夜时高亮不会自动跳，刷新即可
+      var viewYear  = today.getFullYear();  // 当前在看的年份
+      var viewMonth = today.getMonth();     // 当前在看的月份（0 是一月，11 是十二月）
+
+      /* 星期表头（按 WEEK_START 排） */
+      var head = '';
+      for (var i = 0; i < 7; i++) head += '<span>' + WEEK_LABELS[(WEEK_START + i) % 7] + '</span>';
+      weekdaysEl.innerHTML = head;
+
+      /* 按 viewYear / viewMonth 重画这个月 */
+      function render() {
+        titleEl.textContent = viewYear + ' 年 ' + (viewMonth + 1) + ' 月';
+
+        var firstDay = new Date(viewYear, viewMonth, 1).getDay();        // 本月 1 号是星期几
+        var blanks   = (firstDay - WEEK_START + 7) % 7;                  // 前面空几格
+        var dayCount = new Date(viewYear, viewMonth + 1, 0).getDate();   // 本月天数（下月 0 号 = 本月最后一天）
+
+        var html = '';
+        for (var b = 0; b < blanks; b++) html += '<span class="cal-blank"></span>';
+
+        for (var d = 1; d <= dayCount; d++) {
+          var isToday = (viewYear === today.getFullYear() &&
+                         viewMonth === today.getMonth() &&
+                         d === today.getDate());
+          html += '<span class="cal-day' + (isToday ? ' is-today' : '') + '">' + d + '</span>';
+        }
+
+        gridEl.innerHTML = html;
+      }
+
+      prevBtn.addEventListener('click', function () {
+        viewMonth--;
+        if (viewMonth < 0) { viewMonth = 11; viewYear--; }   // 从 1 月往前 → 上一年 12 月
+        render();
+      });
+      nextBtn.addEventListener('click', function () {
+        viewMonth++;
+        if (viewMonth > 11) { viewMonth = 0; viewYear++; }   // 从 12 月往后 → 下一年 1 月
+        render();
+      });
+
+      render();
+    })();
+  </script>
+
+</body>
+</html>

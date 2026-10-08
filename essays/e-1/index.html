@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>写在开始之前（占位） · 随笔 · KngJack的个人主页</title>
+
+  <script>
+    (function () {
+      var theme = 'dark';
+      try {
+        var saved = localStorage.getItem('theme');
+        if (saved === 'light' || saved === 'dark') theme = saved;
+      } catch (e) {}
+      document.documentElement.setAttribute('data-theme', theme);
+    })();
+  </script>
+
+  <link rel="stylesheet" href="../../style.css">
+  <script src="../../math.js" defer></script>
+</head>
+
+<body data-page="essays">
+
+  <div class="bg-image" aria-hidden="true"></div>
+  <div class="bg-overlay" aria-hidden="true"></div>
+
+  <header class="site-header">
+    <div class="header-inner">
+      <a class="site-title" href="../../index.html">KngJack的个人主页</a>
+
+      <div class="header-right">
+        <nav class="site-nav">
+          <a href="../../index.html">首页</a>
+          <a href="../../papers.html">论文</a>
+          <a href="../../essays.html" class="active" aria-current="page">随笔<span class="nav-dot" aria-hidden="true"></span></a>
+          <a href="../../photowall.html">照片墙</a>
+          <a href="../../moments.html">说说</a>
+          <a href="../../about.html">关于</a>
+        </nav>
+
+        <button class="theme-toggle" type="button"
+                aria-label="切换到浅色模式" title="切换到浅色模式">
+          <svg class="icon-sun" viewBox="0 0 24 24" aria-hidden="true">
+            <circle cx="12" cy="12" r="5"/>
+            <line x1="12" y1="1"  x2="12" y2="3"/>
+            <line x1="12" y1="21" x2="12" y2="23"/>
+            <line x1="4.22" y1="4.22"   x2="5.64" y2="5.64"/>
+            <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/>
+            <line x1="1" y1="12" x2="3"  y2="12"/>
+            <line x1="21" y1="12" x2="23" y2="12"/>
+            <line x1="4.22" y1="19.78"  x2="5.64" y2="18.36"/>
+            <line x1="18.36" y1="5.64"  x2="19.78" y2="4.22"/>
+          </svg>
+          <svg class="icon-moon" viewBox="0 0 24 24" aria-hidden="true">
+            <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>
+          </svg>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <main class="doc-page">
+    <article class="glass-card article-card">
+
+      <a class="back-link" href="../../essays.html">← 返回随笔列表</a>
+
+      <h1 class="article-title">左（右）矢与算符的张量积</h1>
+      <p class="article-meta">2026-10-08</p>
+
+      <div class="article-body">
+<p>
+我们先来介绍左矢和线性算符的张量积.
+</p>
+<p>
+假设我们有两个态空间$\mathcal{H}_1$与$\mathcal{H}_2$,那么由定义可知对于任意左矢$\langle\psi_2|\in\mathcal{H}^{*}_2$都可以视为以下线性映射:
+</p>
+$$\begin{align*}
+\langle\psi_2|\colon&\mathcal{H_2}\longrightarrow\mathbb{C}\\
+&|\phi_2\rangle\mapsto \langle\psi_2|\phi_2\rangle=\left(|\psi_2\rangle,|\phi_2\rangle\right)
+\end{align*}$$
+<p>
+  于是利用态空间$\mathcal{H}_1$和作用在上面的线性算符$A_1\colon\mathcal{H}_1\longrightarrow\mathcal{H}_1$,我们可以定义如下映射的张量积:
+</p>
+$$\begin{align*}
+A_1\otimes\langle\psi_2|\colon\mathcal{H}_1\otimes\mathcal{H}_2\longrightarrow\mathcal{H}_1\otimes\mathbb{C}
+\end{align*}$$
+<p>
+  对于向量空间${\mathcal{H}_1\otimes\mathbb{C}}$与$\mathcal{H}_1$,我们可以定义满足以下性质的自然同构:
+</p>
+$$\begin{align*}
+T\colon&\mathcal{H}_1\otimes\mathbb{C} \xrightarrow{1:1} {\mathcal{H}_1} \\
+	&|\phi_1\rangle\otimes\lambda\mapsto {\lambda|\phi_1\rangle}
+\end{align*}$$
+<p>
+  利用该自然同构,我们可以将$A_1\otimes\langle\psi_2|$视为以下映射:
+</p>
+$$\begin{align*}
+A_1\otimes\langle\psi_2|\colon\mathcal{H}_1\otimes\mathcal{H}_2\longrightarrow\mathcal{H}_1
+\end{align*}$$
+<p>
+  它对于任意$|\phi_1\rangle\otimes|\phi_2\rangle$的作用为:
+</p>
+$$\begin{align*}
+    A_1\otimes\langle\psi_2|\left(|\phi_1\rangle\otimes|\phi_2\rangle\right)=\langle\psi_1|\phi_2\rangle A_1|\phi_1\rangle
+\end{align*}$$
+
+<p>
+  当涉及到多个态空间时,也有类似的定义,并且我们也可以仿照上述过程来定义张量积$\langle\psi_1|\otimes A_2$.
+</p>
+
+<p>
+  下面来看其对$\mathcal{H}=\mathcal{H}_1\otimes\mathcal{H}_2$中的任意一个右矢$|\psi\rangle$的作用.
+</p>
+
+<p>
+  若在$\mathcal{H}_1$中选取一组正交归一基$\left\{|u_n\left(1\right)\rangle\right\}$,在$\mathcal{H}_2$中选取一组正交归一基$\left\{|v_p\left(2\right)\rangle\right\}$,那么对于$\mathcal{H}=\mathcal{H}_1\otimes\mathcal{H}_2$中的任意一个右矢$|\psi\rangle$,其可以表示为:
+</p>
+$$\begin{align*}
+    |\psi\rangle=\sum_{n,p}\left(\langle u_n\left(1\right)|\langle v_p\left(2\right)|\right)|\psi\rangle|u_n\left(1\right)\rangle|v_p\left(2\right)\rangle
+\end{align*}$$
+<p>从而有:</p>
+$$\begin{align*}
+    \left(A_1\otimes\langle\psi_2|\right)|\psi\rangle&=\sum_{n,p}\left(\langle u_n\left(1\right)|\langle v_p\left(2\right)|\right)|\psi\rangle\left(A_1\otimes\langle\psi_2|\right)|u_n\left(1\right)\rangle|v_p\left(2\right)\rangle\\
+&=\sum_{n,p}\left(\langle u_n\left(1\right)|\langle v_p\left(2\right)|\right)|\psi\rangle\langle\psi_2|v_p\left(2\right)\rangle A_1|u_n\left(1\right)\rangle
+\end{align*}$$
+<p>
+如果取$A_1$为恒等映射$I_1$,取$\langle\psi_2|$为$\langle v_{p^{\prime}}\left(2\right)|$,那么上式化为:
+</p>
+$$\begin{align*}
+    \left(I_1\otimes\langle v_{p^{\prime}}\left(2\right)|\right)|\psi\rangle=\sum_{n} \left(\langle u_n\left(1\right)|\langle v_{p^{\prime}}\left(2\right)|\right)|\psi\rangle|u_n\left(1\right)\rangle
+\end{align*}$$
+<p>
+  这个计算公式很有用.
+</p>
+<p>
+  下面来介绍线性算符和右矢的张量积.
+</p>
+<p>
+  同样假设我们有两个态空间$\mathcal{H}_1$和$\mathcal{H}_2$,那么对于任意右矢$|\psi_2\rangle\in\mathcal{H}_2$,它可以视为以下线性映射:
+</p>
+$$\begin{align*}
+	|\psi_2\rangle\colon&\mathbb{C} \longrightarrow \mathcal{H}_2 \\
+	&\lambda \mapsto \lambda|\psi_2\rangle
+\end{align*}$$
+<p>
+  于是利用态空间$\mathcal{H}_1$和作用在上面的线性算符$A_1\colon\mathcal{H}_1\longrightarrow\mathcal{H}_1$,我们可以定义如下映射:
+</p>
+$$\begin{align*}
+	A_1\otimes|\psi_2\rangle\colon\mathcal{H}_1\otimes\mathbb{C}\longrightarrow\mathcal{H}_1\otimes\mathcal{H}_2
+\end{align*}$$
+<p>
+  同样利用上面给出的自然同构,我们可将$A_1\otimes|\psi_2\rangle$视为如下映射:
+</p>
+$$\begin{align*}
+	A_1\otimes|\psi_2\rangle\colon\mathcal{H}_1 \longrightarrow \mathcal{H}_1\otimes\mathcal{H}_2
+\end{align*}$$
+<p>
+  它对于任意$\lambda|\phi_1\rangle\in\mathcal{H}_1$的作用为:
+</p>
+$$\begin{align*}
+    A_1\otimes|\psi_2\rangle\left(\lambda|\phi_1\rangle\right)=\lambda A|\phi_1\rangle\otimes|\psi_2\rangle
+\end{align*}$$
+<p>
+同样,当涉及到多个态空间时也有类似的定义,并且也可以仿照上述过程来定义张量积$|\psi_1\rangle\otimes A_2$.
+</p>
+<p>
+  对于态空间为$\mathcal{H}=\mathcal{H}_1\otimes\mathcal{H}_2$的量子系统,设其密度算符为$\rho$,利用前面介绍的运算性质,对体系2取部分迹可以表示为:
+</p>
+$$\begin{align*}
+    \rho_1&=\mathrm{Tr}_2\left(\rho\right)\\
+    &=\sum_{p}\left(I_1\otimes\langle v_p\left(2\right)|\right)\rho\left(I_1\otimes|v_{p}\left(2\right)\rangle\right)
+\end{align*}$$
+<p>
+其中$\left\{|v_p\left(2\right)\rangle\right\}$为$\mathcal{H}_2$的一组正交归一基.
+</p>
+<p>
+同样地,对体系1取部分迹可以表示为:
+</p>
+$$\begin{align*}
+    \rho_2&=\mathrm{Tr}_1\left(\rho\right)\\
+    &=\sum_{n}\left(\langle u_n\left(1\right)|\otimes I_2\right)\rho\left(|u_n\left(1\right)\rangle\otimes I_2\right)
+\end{align*}$$
+<p>
+  其中$\left\{|u_n\left(1\right)\rangle\right\}$为$\mathcal{H}_1$的一组正交归一基.
+</p>
+
+</div>
+      <div class="article-foot">
+        <a href="../../essays.html">← 返回随笔列表</a>
+      </div>
+
+    </article>
+  </main>
+
+  <script src="../../script.js"></script>
+
+</body>
+</html>

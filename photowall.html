@@ -1,0 +1,599 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>照片墙 · KngJack的个人主页</title>
+  <meta name="description" content="KngJack 的照片墙">
+
+  <script>
+    (function () {
+      var theme = 'dark';
+      try {
+        var saved = localStorage.getItem('theme');
+        if (saved === 'light' || saved === 'dark') theme = saved;
+      } catch (e) {}
+      document.documentElement.setAttribute('data-theme', theme);
+    })();
+  </script>
+
+  <link rel="stylesheet" href="style.css">
+</head>
+
+<body data-page="photowall">
+
+  <div class="bg-image" aria-hidden="true"></div>
+  <div class="bg-overlay" aria-hidden="true"></div>
+
+  <header class="site-header">
+    <div class="header-inner">
+      <a class="site-title" href="index.html">KngJack的个人主页</a>
+
+      <div class="header-right">
+        <nav class="site-nav">
+          <a href="index.html">首页</a>
+          <a href="papers.html">论文</a>
+          <a href="essays.html">随笔</a>
+          <a href="photowall.html" class="active" aria-current="page">照片墙<span class="nav-dot" aria-hidden="true"></span></a>
+          <a href="moments.html">说说</a>
+          <a href="about.html">关于</a>
+        </nav>
+
+        <button class="theme-toggle" type="button"
+                aria-label="切换到浅色模式" title="切换到浅色模式">
+          <svg class="icon-sun" viewBox="0 0 24 24" aria-hidden="true">
+            <circle cx="12" cy="12" r="5"/>
+            <line x1="12" y1="1"  x2="12" y2="3"/>
+            <line x1="12" y1="21" x2="12" y2="23"/>
+            <line x1="4.22" y1="4.22"   x2="5.64" y2="5.64"/>
+            <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/>
+            <line x1="1" y1="12" x2="3"  y2="12"/>
+            <line x1="21" y1="12" x2="23" y2="12"/>
+            <line x1="4.22" y1="19.78"  x2="5.64" y2="18.36"/>
+            <line x1="18.36" y1="5.64"  x2="19.78" y2="4.22"/>
+          </svg>
+          <svg class="icon-moon" viewBox="0 0 24 24" aria-hidden="true">
+            <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>
+          </svg>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <main class="page">
+    <div class="photowall-wrap">
+
+      <!-- ============ 视图一：画廊（相册卡片列表） ============ -->
+      <section id="gallery-view">
+        <div class="gallery-head">
+          <h1>照片墙</h1>
+          <p>留住美好过往</p>
+          <!-- 加载提示：脚本跑完自动隐藏；如果 photos/photos.js 还没建好，这里会给出提示 -->
+          <p id="album-loading">正在加载相册…</p>
+        </div>
+
+        <!-- 相册卡片由页面底部的脚本根据 photos/photos.js 的顺序生成，不用手写 -->
+        <div class="album-grid" id="album-grid"></div>
+
+        <!-- 画廊分页条：相册数超过"每页几个"（ALBUMS_PER_PAGE）时出现 -->
+        <div class="pager" id="gallery-pager" hidden>
+          <button class="pager-btn" id="gallery-pager-prev" type="button">← 上一页</button>
+          <span class="pager-info" id="gallery-pager-info">第 1 / 1 页</span>
+          <span class="pager-jump">
+            跳至
+            <input class="pager-input" id="gallery-pager-input" type="number" min="1" value="1" inputmode="numeric" aria-label="跳转到第几页">
+            页
+          </span>
+          <button class="pager-btn" id="gallery-pager-go" type="button">跳转</button>
+          <button class="pager-btn" id="gallery-pager-next" type="button">下一页 →</button>
+        </div>
+      </section>
+
+      <!-- ============ 视图二：相册详情（点开相册后显示） ============ -->
+      <section id="album-view" hidden>
+        <button class="back-btn" id="back-to-gallery" type="button">← 返回画廊</button>
+
+        <div class="detail-head">
+          <p class="detail-date"  id="detail-date"></p>
+          <h1 class="detail-title" id="detail-title"></h1>
+          <p class="detail-desc"  id="detail-desc"></p>
+          <span class="chip"      id="detail-count"></span>
+        </div>
+
+        <!-- 照片由脚本生成：一张一行的大图 + 图下说明，点图看大图 -->
+        <div class="detail-photos" id="detail-photos"></div>
+
+        <!-- 照片分页条：照片数超过"每页几张"（PHOTOS_PER_PAGE）时出现；
+             设成很大的数（比如 999）就等于关掉这个功能 -->
+        <div class="pager" id="detail-pager" hidden>
+          <button class="pager-btn" id="pager-prev" type="button">← 上一页</button>
+          <span class="pager-info" id="pager-info">第 1 / 1 页</span>
+          <span class="pager-jump">
+            跳至
+            <input class="pager-input" id="pager-input" type="number" min="1" value="1" inputmode="numeric" aria-label="跳转到第几页">
+            页
+          </span>
+          <button class="pager-btn" id="pager-go" type="button">跳转</button>
+          <button class="pager-btn" id="pager-next" type="button">下一页 →</button>
+        </div>
+      </section>
+
+    </div>
+  </main>
+
+  <!-- ============ 大图灯箱（默认隐藏，点照片后弹出） ============
+       翻页：两侧圆形按钮 或 键盘 ← / →（到两端会循环，覆盖整本相册）
+       关闭：Esc、点"翻页按钮以外"的任意地方
+       底部提示：鼠标/手指停止操作 3 秒后自动淡出，再动又出现 -->
+  <div class="lightbox" id="lightbox">
+    <button class="lightbox-close" type="button" aria-label="关闭大图">×</button>
+    <span class="lightbox-counter" id="lightbox-counter"></span>
+
+    <button class="lightbox-nav lightbox-prev" id="lightbox-prev" type="button" aria-label="上一张">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><polyline points="15 5 8 12 15 19"/></svg>
+    </button>
+    <button class="lightbox-nav lightbox-next" id="lightbox-next" type="button" aria-label="下一张">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><polyline points="9 5 16 12 9 19"/></svg>
+    </button>
+
+    <img id="lightbox-img" alt="">
+    <p class="lightbox-caption" id="lightbox-caption"></p>
+
+    <!-- 操作提示（样式在 style.css 的 .lightbox-hint，淡出逻辑在本页底部脚本） -->
+    <p class="lightbox-hint" id="lightbox-hint">
+      点两侧箭头或按 ← / → 翻页 · 点任意处或按 Esc 关闭
+    </p>
+  </div>
+
+  <script src="script.js"></script>
+
+  <!-- 相册目录：里面写着有哪些文件夹、按什么顺序显示 -->
+  <script src="photos/photos.js"></script>
+
+  <!-- ================================================================
+       照片墙逻辑（加载相册数据、画廊分页、相册详情、照片分页、大图灯箱）
+       ----------------------------------------------------------------
+       · 数据来源：photos/photos.js（目录，决定顺序与条数）
+                 + 每个相册自己的 photos/<文件夹>/album.js
+                   （标题、日期、描述、照片清单都在里面）；
+       · 图片放在各自的小文件夹里（1.jpg、2.jpg…）；
+       · 封面自动取 photos 里的第一张，不用单独放封面图；
+       · 画廊每页几个相册：改 ALBUMS_PER_PAGE；
+       · 相册详情每页几张照片：改 PHOTOS_PER_PAGE（设 999 = 关掉）。
+       ================================================================ -->
+  <script>
+    (function () {
+      'use strict';
+
+      /* ===================== 参数（可改） ===================== */
+      var PHOTO_DIR       = 'photos/';   // 相册所在的根目录
+      var ALBUMS_PER_PAGE = 8;           // 画廊每页显示几个相册
+      var PHOTOS_PER_PAGE = 4;           // 相册详情每页显示几张照片
+      var HINT_DELAY      = 1500;        // 灯箱提示条：静止多久后淡出（毫秒）
+      var LOAD_TIMEOUT    = 6000;        // 保险：最多等多久就先渲染
+
+      /* ===================== 元素引用（不用改） ===================== */
+      var grid              = document.getElementById('album-grid');
+      var galleryView       = document.getElementById('gallery-view');
+      var galleryPager      = document.getElementById('gallery-pager');
+      var galleryPagerPrev  = document.getElementById('gallery-pager-prev');
+      var galleryPagerNext  = document.getElementById('gallery-pager-next');
+      var galleryPagerInfo  = document.getElementById('gallery-pager-info');
+      var galleryPagerInput = document.getElementById('gallery-pager-input');
+      var galleryPagerGo    = document.getElementById('gallery-pager-go');
+      var albumView         = document.getElementById('album-view');
+      var detailDate        = document.getElementById('detail-date');
+      var detailTitle       = document.getElementById('detail-title');
+      var detailDesc        = document.getElementById('detail-desc');
+      var detailCount       = document.getElementById('detail-count');
+      var detailPhotos      = document.getElementById('detail-photos');
+      var detailPager       = document.getElementById('detail-pager');
+      var pagerPrev         = document.getElementById('pager-prev');
+      var pagerNext         = document.getElementById('pager-next');
+      var pagerInfo         = document.getElementById('pager-info');
+      var pagerInput        = document.getElementById('pager-input');
+      var pagerGo           = document.getElementById('pager-go');
+      var backBtn           = document.getElementById('back-to-gallery');
+      var loadingEl         = document.getElementById('album-loading');
+      var lightbox          = document.getElementById('lightbox');
+      var lightboxImg       = document.getElementById('lightbox-img');
+      var lightboxCap       = document.getElementById('lightbox-caption');
+      var lightboxPrev      = document.getElementById('lightbox-prev');
+      var lightboxNext      = document.getElementById('lightbox-next');
+      var lightboxCounter   = document.getElementById('lightbox-counter');
+      var lightboxHint      = document.getElementById('lightbox-hint');
+
+      function photoUrl(folder, file) { return PHOTO_DIR + folder + '/' + file; }
+
+      /* ===================== 1. 加载相册数据 =====================
+         顺序：先用 <script src> 引入目录文件（photos/photos.js），
+         再按目录逐个加载每个相册的 album.js（标题、日期、描述、照片清单在它里面）。
+         全部加载完（或等超时保险）之后才开始渲染。
+
+         ★ 关键：不要在此时缓存 window.ALBUM_DATA！
+           各 album.js 是"之后"才加载进来的，要等它们都跑完，
+           渲染前再去读 window.ALBUM_DATA，才能拿到数据。 */
+      var folders       = (window.ALBUM_FOLDERS || []).slice();
+      var albums        = [];
+      var loadedCount   = 0;
+      var rendered      = false;
+      var failedFolders = [];   // 记录加载失败的文件夹（用于控制台提示）
+
+      // photos 支持三种写法：
+      //   数字（如 3）  → 用 1.jpg、2.jpg、3.jpg（没有图下说明）
+      //   文件名数组    → 用你写的文件名（没有图下说明）
+      //   对象数组      → { file: 'x.jpg', caption: '说明' }，caption 可以省略
+      function photoList(photos) {
+        var arr = [];
+        if (typeof photos === 'number' && photos > 0) {
+          for (var i = 1; i <= photos; i++) arr.push({ file: i + '.jpg', caption: '' });
+          return arr;
+        }
+        if (Object.prototype.toString.call(photos) === '[object Array]') {
+          photos.forEach(function (p) {
+            if (typeof p === 'string') arr.push({ file: p, caption: '' });
+            else if (p && p.file) arr.push({ file: p.file, caption: p.caption || '' });
+          });
+        }
+        return arr;
+      }
+
+      function finishLoading() {
+        if (rendered) return;      // 只渲染一次
+        rendered = true;
+
+        var dataMap = window.ALBUM_DATA || {};   // ★ 渲染时才读，才拿得到 album.js 写的数据
+        var missing = [];
+
+        folders.forEach(function (folder) {
+          var d = dataMap[folder];
+          if (!d) missing.push(folder);          // 没读到数据的文件夹（文件缺失 / 键名写错）
+
+          albums.push({
+            folder: folder,
+            title:  (d && d.title) || folder,    // 读不到就用文件夹名当标题，方便你认出是哪个
+            date:   (d && d.date)  || '',
+            desc:   (d && d.desc)  ||
+                    ('（没有读到相册数据 · 请检查 ' + PHOTO_DIR + folder + '/album.js）'),
+            photos: photoList(d && d.photos)
+          });
+        });
+
+        if (loadingEl) loadingEl.hidden = true;
+
+        // 控制台诊断：告诉你具体哪个文件有问题
+        if (missing.length || failedFolders.length) {
+          console.warn('[照片墙] 没读到数据的文件夹：' + (missing.join(', ') || '（无）') +
+                       (failedFolders.length ? '；加载失败的文件：' + failedFolders.join(', ') : ''));
+        }
+
+        console.log('[照片墙] 已加载 ' + albums.length + ' 个相册');   // 调试用，可删
+
+        renderGalleryPage();
+      }
+
+      if (!folders.length) {
+        if (loadingEl) {
+          loadingEl.textContent = '还没有相册。请先创建 ' + PHOTO_DIR + 'photos.js（目录）与 ' + PHOTO_DIR + 'album-1/album.js（内容）。';
+        }
+      } else {
+        folders.forEach(function (folder) {
+          var s = document.createElement('script');
+          s.src = PHOTO_DIR + folder + '/album.js';
+          var done = function () {
+            loadedCount++;
+            if (loadedCount >= folders.length) finishLoading();
+          };
+          s.onload  = done;
+          s.onerror = function () { failedFolders.push(folder); done(); };   // 记下是哪个文件没加载上
+          document.head.appendChild(s);
+        });
+
+        // 保险丝：万一有脚本既不 onload 也不 onerror，到点也先渲染
+        setTimeout(finishLoading, LOAD_TIMEOUT);
+      }
+
+      /* ---------- 0. 造一张相册卡片（画廊分页会反复调用） ---------- */
+      function buildAlbumCard(album) {
+        var card = document.createElement('button');   // 用 <button>，键盘也能操作
+        card.type = 'button';
+        card.className = 'album-card glass-card';
+
+        var wrap = document.createElement('span');
+        wrap.className = 'album-cover-wrap';
+
+        // 有照片才放封面图；没有照片（比如 album.js 还没建好）时留一个空底，避免出现裂图
+        if (album.photos.length) {
+          var cover = document.createElement('img');
+          cover.className = 'album-cover';
+          cover.alt = album.title;
+          cover.loading = 'lazy';
+          cover.src = photoUrl(album.folder, album.photos[0].file);   // 第一张当封面
+          wrap.appendChild(cover);
+
+          var count = document.createElement('span');
+          count.className = 'album-count';
+          count.textContent = album.photos.length + ' 张照片';        // 右下角的张数
+          wrap.appendChild(count);
+        }
+
+        var date = document.createElement('span');
+        date.className = 'album-date';
+        date.textContent = album.date;
+
+        var title = document.createElement('span');
+        title.className = 'album-title';
+        title.textContent = album.title;
+
+        var desc = document.createElement('span');
+        desc.className = 'album-desc';
+        desc.textContent = album.desc;
+
+        card.appendChild(wrap);
+        card.appendChild(date);
+        card.appendChild(title);
+        card.appendChild(desc);
+        card.addEventListener('click', function () { openAlbum(album); });
+
+        return card;
+      }
+
+      /* ---------- 1. 画廊分页（相册网格） ---------- */
+      var galleryPage = 0;   // 当前页码（从 0 开始）
+
+      function galleryPageCount() {
+        return Math.max(1, Math.ceil(albums.length / ALBUMS_PER_PAGE));
+      }
+
+      // 只渲染"当前这一页"的相册
+      function renderGalleryPage() {
+        grid.innerHTML = '';
+        var start = galleryPage * ALBUMS_PER_PAGE;
+        var end   = Math.min(start + ALBUMS_PER_PAGE, albums.length);
+        albums.slice(start, end).forEach(function (album) {
+          grid.appendChild(buildAlbumCard(album));
+        });
+        updateGalleryPager();
+      }
+
+      // 更新画廊分页条的文案、按钮状态与输入框（只有一页时整条隐藏）
+      function updateGalleryPager() {
+        var pages = galleryPageCount();
+        if (pages <= 1) { galleryPager.hidden = true; return; }
+
+        galleryPager.hidden = false;
+        galleryPagerInfo.textContent = '第 ' + (galleryPage + 1) + ' / ' + pages + ' 页';
+        galleryPagerPrev.disabled = (galleryPage === 0);              // 第 1 页时"上一页"变灰
+        galleryPagerNext.disabled = (galleryPage === pages - 1);      // 最后一页时"下一页"变灰
+
+        // 同步"跳至"输入框：上限跟着总页数走；正在输入时不打断它
+        galleryPagerInput.max = pages;
+        if (document.activeElement !== galleryPagerInput) {
+          galleryPagerInput.value = galleryPage + 1;
+        }
+      }
+
+      // 跳到指定页（页码自动限制在合法范围内）
+      function gotoGalleryPage(p) {
+        var pages = galleryPageCount();
+        galleryPage = Math.min(Math.max(p, 0), pages - 1);
+        renderGalleryPage();
+        window.scrollTo(0, 0);   // 翻页后回到顶部；不想要就删掉这行
+      }
+
+      galleryPagerPrev.addEventListener('click', function () { gotoGalleryPage(galleryPage - 1); });
+      galleryPagerNext.addEventListener('click', function () { gotoGalleryPage(galleryPage + 1); });
+
+      /* ---------- 2. 打开相册（切到详情视图） ---------- */
+      var currentAlbum = null;   // 当前打开的相册
+      var detailPage   = 0;      // 详情当前页码（从 0 开始）
+
+      function openAlbum(album) {
+        currentAlbum = album;
+        detailPage = 0;                        // 每次打开都从第 1 页开始
+
+        detailDate.textContent  = album.date;
+        detailTitle.textContent = album.title;
+        detailDesc.textContent  = album.desc;
+        detailCount.textContent = '共 ' + album.photos.length + ' 瞬间';
+
+        renderAlbumPage();                     // 渲染详情第 1 页 + 分页状态
+
+        galleryView.hidden = true;    // 隐藏画廊
+        albumView.hidden   = false;   // 显示详情
+        window.scrollTo(0, 0);        // 回到页面顶部；不想要就删掉这行
+      }
+
+      /* ---------- 2.1 相册详情的照片分页 ---------- */
+      function pageCount() {
+        return Math.max(1, Math.ceil(currentAlbum.photos.length / PHOTOS_PER_PAGE));
+      }
+
+      // 只渲染"当前这一页"的照片
+      function renderAlbumPage() {
+        var start = detailPage * PHOTOS_PER_PAGE;
+        var end   = Math.min(start + PHOTOS_PER_PAGE, currentAlbum.photos.length);
+
+        detailPhotos.innerHTML = '';
+        currentAlbum.photos.slice(start, end).forEach(function (photo, k) {
+          var idx = start + k;   // 这张照片在整本相册里的序号（灯箱要用它）
+
+          var fig = document.createElement('figure');
+          fig.className = 'detail-photo';
+
+          var img = document.createElement('img');
+          img.src = photoUrl(currentAlbum.folder, photo.file);
+          img.alt = photo.caption || currentAlbum.title;
+          img.loading = 'lazy';
+          // 点这张图 → 进灯箱；灯箱里可以左右翻遍整本相册
+          img.addEventListener('click', function () { openLightbox(currentAlbum, idx); });
+
+          var cap = document.createElement('figcaption');
+          cap.textContent = photo.caption || '';
+
+          fig.appendChild(img);
+          fig.appendChild(cap);
+          detailPhotos.appendChild(fig);
+        });
+
+        updateDetailPager();
+      }
+
+      function updateDetailPager() {
+        var pages = pageCount();
+        if (pages <= 1) { detailPager.hidden = true; return; }
+
+        detailPager.hidden = false;
+        pagerInfo.textContent = '第 ' + (detailPage + 1) + ' / ' + pages + ' 页';
+        pagerPrev.disabled = (detailPage === 0);
+        pagerNext.disabled = (detailPage === pages - 1);
+
+        pagerInput.max = pages;
+        if (document.activeElement !== pagerInput) {
+          pagerInput.value = detailPage + 1;
+        }
+      }
+
+      function gotoDetailPage(p) {
+        if (!currentAlbum) return;
+        var pages = pageCount();
+        detailPage = Math.min(Math.max(p, 0), pages - 1);
+        renderAlbumPage();
+        window.scrollTo(0, 0);
+      }
+
+      pagerPrev.addEventListener('click', function () { gotoDetailPage(detailPage - 1); });
+      pagerNext.addEventListener('click', function () { gotoDetailPage(detailPage + 1); });
+
+      /* ---------- 2.2 "跳至第 N 页"输入框（两条分页条共用） ----------
+         · 点"跳转"按钮 或 在输入框里按回车 都会跳转；
+         · 页码越界（比如输入 99）会自动限制到范围内；
+         · 输入空 / 非法内容时什么也不做，只把输入框清空。 */
+      function bindPageJump(inputEl, goBtn, gotoFn) {
+        function jump() {
+          var v = parseInt(inputEl.value, 10);
+          if (isNaN(v)) { inputEl.value = ''; return; }   // 空或非法输入：清空，不跳
+          gotoFn(v - 1);                                  // 页码从 1 开始，跳转函数内部会限制范围
+          if (document.activeElement === inputEl) inputEl.blur();   // 手机上收起键盘
+        }
+        goBtn.addEventListener('click', jump);
+        inputEl.addEventListener('keydown', function (e) {
+          if (e.key === 'Enter') { e.preventDefault(); jump(); }
+        });
+      }
+      bindPageJump(galleryPagerInput, galleryPagerGo, gotoGalleryPage);   // 画廊分页条
+      bindPageJump(pagerInput,        pagerGo,        gotoDetailPage);    // 相册详情分页条
+
+      /* ---------- 3. 返回画廊（保留你刚才所在的页码） ---------- */
+      backBtn.addEventListener('click', function () {
+        albumView.hidden   = true;
+        galleryView.hidden = false;
+        window.scrollTo(0, 0);   // 不想要就删掉这行
+        // 注意：这里没有重新渲染画廊，所以返回后仍停在第 N 页
+      });
+
+      /* ---------- 4. 大图灯箱 + 翻页（覆盖整本相册） ---------- */
+      var lbAlbum = null;    // 当前正在看的相册
+      var lbIndex = 0;       // 当前这张在相册里的序号（从 0 开始）
+
+      function openLightbox(album, index) {
+        lbAlbum = album;
+        lbIndex = Math.min(Math.max(index, 0), album.photos.length - 1);
+
+        // 只有一张照片的相册就不显示翻页按钮
+        var many = album.photos.length > 1;
+        lightboxPrev.hidden = !many;
+        lightboxNext.hidden = !many;
+
+        renderLightbox();
+        lightbox.classList.add('open');
+        document.body.style.overflow = 'hidden';   // 打开时禁止背景滚动
+        showHintThenFade();                        // 显示底部提示并开始 3 秒倒计时
+      }
+
+      // 把"当前这张"画进灯箱（图片、说明文字、左上角计数）
+      function renderLightbox() {
+        var photo = lbAlbum.photos[lbIndex];
+        lightboxImg.src = photoUrl(lbAlbum.folder, photo.file);
+        lightboxCap.textContent = photo.caption || '';
+        lightboxCounter.textContent = (lbIndex + 1) + ' / ' + lbAlbum.photos.length;
+        preloadNeighbours();
+      }
+
+      // 翻页：-1 上一张 / +1 下一张；到两端会循环
+      function stepLightbox(delta) {
+        if (!lbAlbum) return;
+        var n = lbAlbum.photos.length;
+        lbIndex = (lbIndex + delta + n) % n;   // 取模实现循环
+        renderLightbox();
+      }
+
+      // 预加载相邻两张，翻页更顺滑（纯优化，可删）
+      function preloadNeighbours() {
+        var n = lbAlbum.photos.length;
+        if (n < 2) return;
+        [(lbIndex + 1) % n, (lbIndex - 1 + n) % n].forEach(function (i) {
+          var im = new Image();
+          im.src = photoUrl(lbAlbum.folder, lbAlbum.photos[i].file);
+        });
+      }
+
+      function closeLightbox() {
+        lightbox.classList.remove('open');
+        lightboxImg.src = '';        // 关掉后清空，避免下次打开闪旧图
+        lbAlbum = null;
+        document.body.style.overflow = '';
+      }
+
+      lightboxPrev.addEventListener('click', function () { stepLightbox(-1); });
+      lightboxNext.addEventListener('click', function () { stepLightbox(1); });
+
+      // 点击"翻页按钮以外"的地方关闭灯箱（点 ×、点图片、点背景都算）。
+      // 想改成"点图片不关闭"：把条件换成 closest('.lightbox-nav, #lightbox-img')
+      lightbox.addEventListener('click', function (e) {
+        if (e.target.closest('.lightbox-nav')) return;
+        closeLightbox();
+      });
+
+      // 键盘：Esc 关闭；← / → 翻页
+      document.addEventListener('keydown', function (e) {
+        if (!lightbox.classList.contains('open')) return;
+        if (e.target && e.target.tagName === 'INPUT') return;
+        if (e.key === 'Escape') {
+          closeLightbox();
+        } else if (e.key === 'ArrowLeft') {
+          e.preventDefault();
+          stepLightbox(-1);
+        } else if (e.key === 'ArrowRight') {
+          e.preventDefault();
+          stepLightbox(1);
+        }
+      });
+
+      /* ---------- 5. 底部提示：停止操作 3 秒后淡出 ---------- */
+      var hintTimer = null;
+
+      // 手机上没有键盘/鼠标悬停，把提示文字换成触屏版本
+      if (lightboxHint && window.matchMedia && matchMedia('(hover: none)').matches) {
+        lightboxHint.textContent = '点两侧箭头翻页 · 点任意处关闭';
+      }
+
+      function showHintThenFade() {
+        if (!lightboxHint) return;              // 防御：提示元素被删掉也不会报错
+        clearTimeout(hintTimer);
+        lightboxHint.classList.remove('is-hidden');
+        hintTimer = setTimeout(function () {
+          lightboxHint.classList.add('is-hidden');
+        }, HINT_DELAY);
+      }
+
+      lightbox.addEventListener('mousemove', showHintThenFade);                      // 桌面：鼠标一动就重新显示
+      lightbox.addEventListener('touchstart', showHintThenFade, { passive: true });  // 手机：手指一碰就重新显示
+      document.addEventListener('keydown', function () {                              // 键盘操作时也重新显示
+        if (lightbox.classList.contains('open')) showHintThenFade();
+      });
+    })();
+  </script>
+
+</body>
+</html>

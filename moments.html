@@ -1,0 +1,515 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>说说 · KngJack的个人主页</title>
+  <meta name="description" content="KngJack 的说说与零散动态">
+
+  <script>
+    (function () {
+      var theme = 'dark';
+      try {
+        var saved = localStorage.getItem('theme');
+        if (saved === 'light' || saved === 'dark') theme = saved;
+      } catch (e) {}
+      document.documentElement.setAttribute('data-theme', theme);
+    })();
+  </script>
+
+  <link rel="stylesheet" href="style.css">
+</head>
+
+<body data-page="moments">
+
+  <div class="bg-image" aria-hidden="true"></div>
+  <div class="bg-overlay" aria-hidden="true"></div>
+
+  <header class="site-header">
+    <div class="header-inner">
+      <a class="site-title" href="index.html">KngJack的个人主页</a>
+
+      <div class="header-right">
+        <nav class="site-nav">
+          <a href="index.html">首页</a>
+          <a href="papers.html">论文</a>
+          <a href="essays.html">随笔</a>
+          <a href="photowall.html">照片墙</a>
+          <a href="moments.html" class="active" aria-current="page">说说<span class="nav-dot" aria-hidden="true"></span></a>
+          <a href="about.html">关于</a>
+        </nav>
+
+        <button class="theme-toggle" type="button"
+                aria-label="切换到浅色模式" title="切换到浅色模式">
+          <svg class="icon-sun" viewBox="0 0 24 24" aria-hidden="true">
+            <circle cx="12" cy="12" r="5"/>
+            <line x1="12" y1="1"  x2="12" y2="3"/>
+            <line x1="12" y1="21" x2="12" y2="23"/>
+            <line x1="4.22" y1="4.22"   x2="5.64" y2="5.64"/>
+            <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/>
+            <line x1="1" y1="12" x2="3"  y2="12"/>
+            <line x1="21" y1="12" x2="23" y2="12"/>
+            <line x1="4.22" y1="19.78"  x2="5.64" y2="18.36"/>
+            <line x1="18.36" y1="5.64"  x2="19.78" y2="4.22"/>
+          </svg>
+          <svg class="icon-moon" viewBox="0 0 24 24" aria-hidden="true">
+            <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>
+          </svg>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <main class="page">
+    <div class="moments-wrap">
+
+      <div class="gallery-head">
+        <h1>说说</h1>
+        <p>文字的温度</p>
+      </div>
+
+      <!-- 加载提示：脚本跑完自动隐藏 -->
+      <p class="moments-loading" id="moments-loading">正在加载说说…</p>
+
+      <!-- 说说卡片由脚本根据 moments/moments.js 的顺序生成，不用手写。
+           每条卡片顶部显示"头像 + 名称 + 日期"，头像与名称来自 profile.js -->
+      <div class="moment-list" id="moment-list"></div>
+
+      <!-- 分页条：说说超过"每页几条"（MOMENTS_PER_PAGE，默认 20）时出现 -->
+      <div class="pager" id="moments-pager" hidden>
+        <button class="pager-btn" id="moments-pager-prev" type="button">← 上一页</button>
+        <span class="pager-info" id="moments-pager-info">第 1 / 1 页</span>
+        <span class="pager-jump">
+          跳至
+          <input class="pager-input" id="moments-pager-input" type="number" min="1" value="1" inputmode="numeric" aria-label="跳转到第几页">
+          页
+        </span>
+        <button class="pager-btn" id="moments-pager-go" type="button">跳转</button>
+        <button class="pager-btn" id="moments-pager-next" type="button">下一页 →</button>
+      </div>
+
+    </div>
+  </main>
+
+  <!-- ============ 大图灯箱（点缩略图后弹出） ============
+       翻页：两侧圆形按钮 或 键盘 ← / →（只在这条说说的图片里循环）
+       跳转：右上角"跳至 [__] 张 [跳转]"（越界会自动夹到范围内）
+       关闭：Esc、点"翻页按钮/跳转控件以外"的任意地方
+       底部提示：鼠标/手指停止操作 3 秒后自动淡出，再动又出现 -->
+  <div class="lightbox" id="lightbox">
+    <button class="lightbox-close" type="button" aria-label="关闭大图">×</button>
+    <span class="lightbox-counter" id="lightbox-counter"></span>
+
+    <button class="lightbox-nav lightbox-prev" id="lightbox-prev" type="button" aria-label="上一张">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><polyline points="15 5 8 12 15 19"/></svg>
+    </button>
+    <button class="lightbox-nav lightbox-next" id="lightbox-next" type="button" aria-label="下一张">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><polyline points="9 5 16 12 9 19"/></svg>
+    </button>
+
+    <img id="lightbox-img" alt="">
+    <p class="lightbox-caption" id="lightbox-caption"></p>
+
+    <!-- 跳转控件：只有一张图的说说会把它隐藏 -->
+    <div class="lightbox-jump" id="lightbox-jump">
+      跳至
+      <input class="lightbox-jump-input" id="lightbox-jump-input" type="number" min="1" value="1" inputmode="numeric" aria-label="跳转到第几张">
+      张
+      <button class="lightbox-jump-btn" id="lightbox-jump-go" type="button">跳转</button>
+    </div>
+
+    <p class="lightbox-hint" id="lightbox-hint">
+      点两侧箭头或按 ← / → 翻页 · 点任意处或按 Esc 关闭
+    </p>
+  </div>
+
+  <script src="script.js"></script>
+
+  <!-- 全站个人信息（名字 / 头像的唯一来源，与首页共用同一份数据） -->
+  <script src="profile.js"></script>
+
+  <!-- 说说目录：里面写着有哪些文件夹、按什么顺序显示 -->
+  <script src="moments/moments.js"></script>
+
+  <!-- ================================================================
+       说说页逻辑（加载数据、分页、九宫格、灯箱）
+       ----------------------------------------------------------------
+       · 数据来源：moments/moments.js（目录）+ 每条 moments/m-X/post.js；
+       · 卡片上的名字与头像：来自 profile.js（与首页同步）；
+       · 每页几条：改下面的 MOMENTS_PER_PAGE；
+       · 提示条淡出时间：改 HINT_DELAY。
+       ================================================================ -->
+  <script>
+    (function () {
+      'use strict';
+
+      /* ===================== 参数（可改） ===================== */
+      var MOMENT_DIR       = 'moments/';   // 说说所在的根目录
+      var MOMENTS_PER_PAGE = 8;           // 每页显示几条说说
+      var HINT_DELAY       = 1500;         // 灯箱提示条：静止多久后淡出（毫秒）
+      var LOAD_TIMEOUT     = 6000;         // 保险：最多等多久就先渲染
+
+      /* 头像还没放好时用的内置占位图（灰色小人），和首页用的是同一张 */
+      var FALLBACK_AVATAR = 'data:image/svg+xml;charset=utf-8,%3Csvg%20xmlns=%27http://www.w3.org/2000/svg%27%20viewBox=%270%200%2096%2096%27%3E%3Crect%20width=%2796%27%20height=%2796%27%20fill=%27%23e2e8f0%27/%3E%3Ccircle%20cx=%2748%27%20cy=%2738%27%20r=%2715%27%20fill=%27%2394a3b8%27/%3E%3Cpath%20d=%27M16%2096c0-18%2014-30%2032-30s32%2012%2032%2030z%27%20fill=%27%2394a3b8%27/%3E%3C/svg%3E';
+
+      /* ===================== 元素引用 ===================== */
+      var listEl          = document.getElementById('moment-list');
+      var loadingEl       = document.getElementById('moments-loading');
+      var pagerEl         = document.getElementById('moments-pager');
+      var pagerPrev       = document.getElementById('moments-pager-prev');
+      var pagerNext       = document.getElementById('moments-pager-next');
+      var pagerInfo       = document.getElementById('moments-pager-info');
+      var pagerInput      = document.getElementById('moments-pager-input');
+      var pagerGo         = document.getElementById('moments-pager-go');
+      var lightbox        = document.getElementById('lightbox');
+      var lightboxImg     = document.getElementById('lightbox-img');
+      var lightboxCap     = document.getElementById('lightbox-caption');
+      var lightboxPrev    = document.getElementById('lightbox-prev');
+      var lightboxNext    = document.getElementById('lightbox-next');
+      var lightboxCounter = document.getElementById('lightbox-counter');
+      var lightboxHint    = document.getElementById('lightbox-hint');
+      var lightboxJump    = document.getElementById('lightbox-jump');
+      var jumpInput       = document.getElementById('lightbox-jump-input');
+      var jumpGo          = document.getElementById('lightbox-jump-go');
+
+      /* ===================== 1. 加载说说数据 =====================
+         顺序：先用 <script src> 引入目录文件（moments/moments.js），
+         再按目录逐个加载每条说说的 post.js（日期与正文在它里面）。
+         全部加载完（或等超时保险）之后才开始渲染。
+
+         ★ 关键：不要在此时缓存 window.MOMENT_DATA！
+           各 post.js 是"之后"才加载进来的，要等它们都跑完，
+           渲染前再去读 window.MOMENT_DATA，才能拿到数据。 */
+      var folders       = (window.MOMENT_FOLDERS || []).slice();
+      var moments       = [];
+      var loadedCount   = 0;
+      var rendered      = false;
+      var failedFolders = [];   // 记录加载失败的文件夹（用于控制台提示）
+
+      // images 可以写成数字（用 1.jpg、2.jpg…），也可以写成数组（用你写死的文件名）
+      function imageFiles(images) {
+        if (typeof images === 'number' && images > 0) {
+          var arr = [];
+          for (var i = 1; i <= images; i++) arr.push(i + '.jpg');
+          return arr;
+        }
+        if (Object.prototype.toString.call(images) === '[object Array]') return images.slice();
+        return [];
+      }
+
+      function finishLoading() {
+        if (rendered) return;      // 只渲染一次
+        rendered = true;
+
+        var dataMap = window.MOMENT_DATA || {};   // ★ 渲染时才读，才拿得到 post.js 写的数据
+        var missing = [];
+
+        folders.forEach(function (folder) {
+          var d = dataMap[folder];
+          if (!d) missing.push(folder);           // 没读到数据的文件夹（文件缺失 / 键名写错）
+
+          moments.push({
+            folder: folder,
+            date:   (d && d.date) || '',
+            text:   (d && d.text) ||
+                    ('（没有读到这条说说的数据 · 请检查 ' + MOMENT_DIR + folder + '/post.js）'),
+            files:  imageFiles(d && d.images)
+          });
+        });
+
+        if (loadingEl) loadingEl.hidden = true;
+
+        // 控制台诊断：告诉你具体哪个文件有问题
+        if (missing.length || failedFolders.length) {
+          console.warn('[说说] 没读到数据的文件夹：' + (missing.join(', ') || '（无）') +
+                       (failedFolders.length ? '；加载失败的文件：' + failedFolders.join(', ') : ''));
+        }
+
+        renderMomentPage();
+      }
+
+      if (!folders.length) {
+        if (loadingEl) {
+          loadingEl.textContent = '还没有说说。请先创建 ' + MOMENT_DIR + 'moments.js（目录）与 ' + MOMENT_DIR + 'm-1/post.js（内容）。';
+        }
+      } else {
+        folders.forEach(function (folder) {
+          var s = document.createElement('script');
+          s.src = MOMENT_DIR + folder + '/post.js';
+          var done = function () {
+            loadedCount++;
+            if (loadedCount >= folders.length) finishLoading();
+          };
+          s.onload  = done;
+          s.onerror = function () { failedFolders.push(folder); done(); };   // 记下是哪个文件没加载上
+          document.head.appendChild(s);
+        });
+
+        // 保险丝：万一有脚本既不 onload 也不 onerror，到点也先渲染
+        setTimeout(finishLoading, LOAD_TIMEOUT);
+      }
+
+      /* ===================== 2. 分页 ===================== */
+      var momentPage = 0;
+
+      function momentsPageCount() {
+        return Math.max(1, Math.ceil(moments.length / MOMENTS_PER_PAGE));
+      }
+
+      function renderMomentPage() {
+        listEl.innerHTML = '';
+        var start = momentPage * MOMENTS_PER_PAGE;
+        var end   = Math.min(start + MOMENTS_PER_PAGE, moments.length);
+        moments.slice(start, end).forEach(function (m) {
+          listEl.appendChild(buildMomentCard(m));
+        });
+        updateMomentsPager();
+      }
+
+      function updateMomentsPager() {
+        var pages = momentsPageCount();
+        if (pages <= 1) { pagerEl.hidden = true; return; }   // 只有一页就不显示分页条
+
+        pagerEl.hidden = false;
+        pagerInfo.textContent = '第 ' + (momentPage + 1) + ' / ' + pages + ' 页';
+        pagerPrev.disabled = (momentPage === 0);
+        pagerNext.disabled = (momentPage === pages - 1);
+        pagerInput.max = pages;
+        if (document.activeElement !== pagerInput) pagerInput.value = momentPage + 1;
+      }
+
+      function gotoMomentsPage(p) {
+        var pages = momentsPageCount();
+        momentPage = Math.min(Math.max(p, 0), pages - 1);
+        renderMomentPage();
+        window.scrollTo(0, 0);   // 翻页后回到顶部；不想要就删掉这行
+      }
+
+      pagerPrev.addEventListener('click', function () { gotoMomentsPage(momentPage - 1); });
+      pagerNext.addEventListener('click', function () { gotoMomentsPage(momentPage + 1); });
+
+      /* "跳至第 N 页"输入框：点按钮或按回车都行，越界自动夹住 */
+      function bindPageJump(inputEl, goBtn, gotoFn) {
+        function jump() {
+          var v = parseInt(inputEl.value, 10);
+          if (isNaN(v)) { inputEl.value = ''; return; }
+          gotoFn(v - 1);
+          if (document.activeElement === inputEl) inputEl.blur();
+        }
+        goBtn.addEventListener('click', jump);
+        inputEl.addEventListener('keydown', function (e) {
+          if (e.key === 'Enter') { e.preventDefault(); jump(); }
+        });
+      }
+      bindPageJump(pagerInput, pagerGo, gotoMomentsPage);
+
+      /* ===================== 3. 造一条说说的卡片 ===================== */
+      function buildMomentCard(m) {
+        // 名字与头像：来自 profile.js（与首页个人卡片同一份数据）
+        var owner = window.SITE_OWNER || {};
+
+        var card = document.createElement('article');
+        card.className = 'moment-card glass-card';
+
+        /* ---- 顶部：头像 + 名称 + 日期（参照参考站的结构） ---- */
+        var head = document.createElement('div');
+        head.className = 'moment-head';
+
+        var avatarWrap = document.createElement('div');
+        avatarWrap.className = 'moment-avatar-wrap';   // 和首页头像同一套"渐变描边"风格
+
+        var avatar = document.createElement('img');
+        avatar.className = 'moment-avatar';
+        avatar.alt = (owner.name || '') + ' 的头像';
+        avatar.src = owner.avatar || FALLBACK_AVATAR;
+        // 头像文件缺失时退回内置占位图，不出现裂图
+        avatar.onerror = function () { this.onerror = null; this.src = FALLBACK_AVATAR; };
+        avatarWrap.appendChild(avatar);
+        head.appendChild(avatarWrap);
+
+        var who = document.createElement('div');
+        who.className = 'moment-who';
+
+        var nameEl = document.createElement('p');
+        nameEl.className = 'moment-name';
+        nameEl.textContent = owner.name || 'KngJack';   // 读不到 profile.js 时的默认名字
+
+        var dateEl = document.createElement('p');
+        dateEl.className = 'moment-date';
+        dateEl.textContent = m.date || '';
+
+        who.appendChild(nameEl);
+        who.appendChild(dateEl);
+        head.appendChild(who);
+        card.appendChild(head);
+
+        /* ---- 正文：换行由 CSS 原样显示 ---- */
+        var text = document.createElement('p');
+        text.className = 'moment-text';
+        text.textContent = m.text || '';
+        card.appendChild(text);
+
+        /* ---- 九宫格：最多铺 9 格 ---- */
+        if (m.files.length) {
+          var grid = document.createElement('div');
+          grid.className = 'moment-grid';
+
+          m.files.slice(0, 9).forEach(function (file, i) {
+            var cell = document.createElement('button');
+            cell.type = 'button';
+            cell.className = 'moment-thumb';
+
+            var img = document.createElement('img');
+            img.src = MOMENT_DIR + m.folder + '/' + file;
+            img.alt = (m.date || '') + ' 的第 ' + (i + 1) + ' 张图片';
+            img.loading = 'lazy';
+            cell.appendChild(img);
+
+            if (i === 8 && m.files.length > 9) {
+              // 第 9 格盖一层 "+N"；点它直接跳到第 10 张开始看
+              var more = document.createElement('span');
+              more.className = 'moment-more';
+              more.textContent = '+' + (m.files.length - 9);
+              cell.appendChild(more);
+              cell.setAttribute('aria-label', '查看其余的 ' + (m.files.length - 9) + ' 张');
+              cell.addEventListener('click', function () { openLightbox(m, 9); });
+            } else {
+              cell.addEventListener('click', function () { openLightbox(m, i); });
+            }
+
+            grid.appendChild(cell);
+          });
+
+          card.appendChild(grid);
+        }
+
+        return card;
+      }
+
+      /* ===================== 4. 灯箱（含翻页与跳转） ===================== */
+      var lbMoment = null;   // 当前正在看的那条说说
+      var lbIndex  = 0;      // 当前这张的序号（从 0 开始）
+
+      function openLightbox(m, index) {
+        lbMoment = m;
+        lbIndex  = Math.min(Math.max(index, 0), m.files.length - 1);
+
+        // 只有一张图时，翻页按钮和"跳至第 N 张"都没意义，隐藏掉
+        var many = m.files.length > 1;
+        lightboxPrev.hidden = !many;
+        lightboxNext.hidden = !many;
+        lightboxJump.hidden = !many;
+
+        renderLightbox();
+        lightbox.classList.add('open');
+        document.body.style.overflow = 'hidden';   // 打开时禁止背景滚动
+        showHintThenFade();                        // 显示底部提示并开始 3 秒倒计时
+      }
+
+      function renderLightbox() {
+        lightboxImg.src = MOMENT_DIR + lbMoment.folder + '/' + lbMoment.files[lbIndex];
+        lightboxCap.textContent = lbMoment.date || '';   // 图下方显示这条说说的日期
+        lightboxCounter.textContent = '第 ' + (lbIndex + 1) + ' / 共 ' + lbMoment.files.length + ' 张';
+
+        jumpInput.max = lbMoment.files.length;
+        if (document.activeElement !== jumpInput) jumpInput.value = lbIndex + 1;
+
+        preloadNeighbours();
+      }
+
+      // 翻页：只在这条说说的图片里循环
+      function stepLightbox(delta) {
+        if (!lbMoment) return;
+        var n = lbMoment.files.length;
+        lbIndex = (lbIndex + delta + n) % n;
+        renderLightbox();
+      }
+
+      // 预加载相邻两张，翻页更顺滑（纯优化，可删）
+      function preloadNeighbours() {
+        var n = lbMoment.files.length;
+        if (n < 2) return;
+        [(lbIndex + 1) % n, (lbIndex - 1 + n) % n].forEach(function (i) {
+          var im = new Image();
+          im.src = MOMENT_DIR + lbMoment.folder + '/' + lbMoment.files[i];
+        });
+      }
+
+      function closeLightbox() {
+        lightbox.classList.remove('open');
+        lightboxImg.src = '';        // 关掉后清空，避免下次打开闪旧图
+        lbMoment = null;
+        document.body.style.overflow = '';
+      }
+
+      // 跳转：输入第几张 → 跳过去；越界自动夹到 1 ~ N
+      function jumpToImage() {
+        if (!lbMoment) return;
+        var v = parseInt(jumpInput.value, 10);
+        if (isNaN(v)) { jumpInput.value = lbIndex + 1; return; }   // 空/非法输入：恢复当前张
+        lbIndex = Math.min(Math.max(v, 1), lbMoment.files.length) - 1;
+        renderLightbox();
+        if (document.activeElement === jumpInput) jumpInput.blur();   // 手机上收起键盘
+      }
+
+      lightboxPrev.addEventListener('click', function () { stepLightbox(-1); });
+      lightboxNext.addEventListener('click', function () { stepLightbox(1); });
+      jumpGo.addEventListener('click', jumpToImage);
+      jumpInput.addEventListener('keydown', function (e) {
+        if (e.key === 'Enter') {
+          e.preventDefault();
+          jumpToImage();
+        } else if (e.key === 'Escape') {
+          jumpInput.blur();          // 先退出输入框；再按一次 Esc 才关闭灯箱
+        }
+      });
+
+      // 点"翻页按钮 / 跳转控件以外"的地方关闭灯箱（点 ×、点图片、点背景都算）
+      lightbox.addEventListener('click', function (e) {
+        if (e.target.closest('.lightbox-nav')) return;    // 翻页按钮
+        if (e.target.closest('.lightbox-jump')) return;   // 跳转控件（输入框与按钮）
+        closeLightbox();
+      });
+
+      // 键盘：Esc 关闭；← / → 翻页（正在输入页码时，键盘交给输入框）
+      document.addEventListener('keydown', function (e) {
+        if (!lightbox.classList.contains('open')) return;
+        if (e.target && e.target.tagName === 'INPUT') return;
+        if (e.key === 'Escape') {
+          closeLightbox();
+        } else if (e.key === 'ArrowLeft') {
+          e.preventDefault();
+          stepLightbox(-1);
+        } else if (e.key === 'ArrowRight') {
+          e.preventDefault();
+          stepLightbox(1);
+        }
+      });
+
+      /* ===================== 5. 底部提示：停止操作 3 秒后淡出 ===================== */
+      var hintTimer = null;
+
+      // 手机上没有键盘/鼠标悬停，把提示文字换成触屏版本
+      if (lightboxHint && window.matchMedia && matchMedia('(hover: none)').matches) {
+        lightboxHint.textContent = '点两侧箭头翻页 · 点任意处关闭';
+      }
+
+      function showHintThenFade() {
+        if (!lightboxHint) return;
+        clearTimeout(hintTimer);
+        lightboxHint.classList.remove('is-hidden');
+        hintTimer = setTimeout(function () {
+          lightboxHint.classList.add('is-hidden');
+        }, HINT_DELAY);
+      }
+
+      lightbox.addEventListener('mousemove', showHintThenFade);                      // 桌面：鼠标一动就重新显示
+      lightbox.addEventListener('touchstart', showHintThenFade, { passive: true });  // 手机：手指一碰就重新显示
+      document.addEventListener('keydown', function () {                              // 键盘操作时也重新显示
+        if (lightbox.classList.contains('open')) showHintThenFade();
+      });
+    })();
+  </script>
+
+</body>
+</html>

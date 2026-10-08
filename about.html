@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>关于 · KngJack的个人主页</title>
+  <meta name="description" content="关于 KngJack">
+
+  <script>
+    (function () {
+      var theme = 'dark';
+      try {
+        var saved = localStorage.getItem('theme');
+        if (saved === 'light' || saved === 'dark') theme = saved;
+      } catch (e) {}
+      document.documentElement.setAttribute('data-theme', theme);
+    })();
+  </script>
+
+  <link rel="stylesheet" href="style.css">
+</head>
+
+<body data-page="about">
+
+  <div class="bg-image" aria-hidden="true"></div>
+  <div class="bg-overlay" aria-hidden="true"></div>
+
+  <header class="site-header">
+    <div class="header-inner">
+      <a class="site-title" href="index.html">KngJack的个人主页</a>
+
+      <div class="header-right">
+        <nav class="site-nav">
+          <a href="index.html">首页</a>
+          <a href="papers.html">论文</a>
+          <a href="essays.html">随笔</a>
+          <a href="photowall.html">照片墙</a>
+          <a href="moments.html">说说</a>
+          <a href="about.html" class="active" aria-current="page">关于<span class="nav-dot" aria-hidden="true"></span></a>
+        </nav>
+
+        <button class="theme-toggle" type="button"
+                aria-label="切换到浅色模式" title="切换到浅色模式">
+          <svg class="icon-sun" viewBox="0 0 24 24" aria-hidden="true">
+            <circle cx="12" cy="12" r="5"/>
+            <line x1="12" y1="1"  x2="12" y2="3"/>
+            <line x1="12" y1="21" x2="12" y2="23"/>
+            <line x1="4.22" y1="4.22"   x2="5.64" y2="5.64"/>
+            <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/>
+            <line x1="1" y1="12" x2="3"  y2="12"/>
+            <line x1="21" y1="12" x2="23" y2="12"/>
+            <line x1="4.22" y1="19.78"  x2="5.64" y2="18.36"/>
+            <line x1="18.36" y1="5.64"  x2="19.78" y2="4.22"/>
+          </svg>
+          <svg class="icon-moon" viewBox="0 0 24 24" aria-hidden="true">
+            <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>
+          </svg>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <main class="doc-page">
+
+    <div class="about-wrap">
+      <article class="glass-card about-card">
+
+        <!-- 顶部渐变带（不用图片；想换成自己的图，见 style.css 第十六节里 .about-banner 的注释） -->
+        <div class="about-banner" aria-hidden="true"></div>
+
+        <div class="about-body">
+
+          <!-- 头像：圆形，压在渐变带上（头像文件来自 profile.js，与首页、说说页同一份） -->
+          <div class="about-avatar">
+            <img id="about-avatar" alt="">
+          </div>
+
+          <div class="about-head">
+            <div class="about-head-text">
+              <h1 class="about-title">关于我</h1>
+              <!-- 下面这行会显示成大写（CSS 里的 text-transform），名字部分来自 profile.js -->
+              <p class="about-eyebrow">Hello, I'm <span id="about-name">KngJack</span></p>
+            </div>
+
+            <!-- 分段切换条：两个按钮切换下面两栏内容。
+                 不想要切换的话：把 .about-tabs 整块删掉、把页面底部那段切换脚本也删掉，
+                 再把两个 .about-prose 的 hidden 都去掉，正文就变回一整块 -->
+            <div class="about-tabs" role="tablist" aria-label="关于内容切换">
+              <button class="about-tab is-active" id="tab-intro" type="button"
+                      role="tab" aria-selected="true" aria-controls="panel-intro">自我介绍</button>
+              <button class="about-tab" id="tab-research" type="button"
+                      role="tab" aria-selected="false" aria-controls="panel-research">研究兴趣</button>
+            </div>
+          </div>
+
+          <div class="about-divider" aria-hidden="true"></div>
+
+          <!-- ============ 第一栏：自我介绍 ============ -->
+          <div class="about-prose" id="panel-intro" role="tabpanel" aria-labelledby="tab-intro">
+            <p>你好，我是 KngJack，音游与二次元爱好者，物理学研究生待读（已保研）。</p>
+
+            <p>目前专注于<strong>凝聚态物理</strong>的学习。</p>
+
+            <p><strong>🔬 在做的事</strong></p>
+            <ul>
+              <li><strong>量子热力学研究：</strong>非马尔可夫环境中Ergotropy的演化。</li>
+              <li><strong>语言学习：</strong>努力学习法语与英语中。</li>
+            </ul>
+
+            <!--<p><strong>📮 联系我：</strong><a href="mailto:your@email.com">your@email.com</a></p>-->
+
+            <blockquote>我们都曾像个孩子般迷失在梦想中。</blockquote>
+          </div>
+
+          <!-- ============ 第二栏：研究兴趣 ============ -->
+          <div class="about-prose" id="panel-research" role="tabpanel" aria-labelledby="tab-research" hidden>
+            <!--<p>这一栏可以放研究兴趣、在读的书、在学的东西（占位）。</p>-->
+
+            <p><strong>🔭 研究兴趣</strong></p>
+            <ul>
+              <li>凝聚态物理中的拓扑与几何</li>
+              
+            </ul>
+
+            <p><strong>📚 最近在学</strong></p>
+            <ul>
+              <li>高显 《经典力学》</li>
+              <li>李文威 《代数学讲义》</li>
+              <li>于品 《数学分析讲义》</li>
+            </ul>
+
+            <!--<p>想聊的话可以写信给我：<a href="mailto:your@email.com">your@email.com</a></p>-->
+          </div>
+
+        </div>
+      </article>
+    </div>
+
+  </main>
+
+  <script src="script.js"></script>
+
+  <!-- 全站个人信息（名字 / 头像的唯一来源，与首页、说说页共用同一份数据） -->
+  <script src="profile.js"></script>
+
+  <!-- 把 profile.js 里的名字与头像填进这一页 -->
+  <script>
+    (function () {
+      var owner = window.SITE_OWNER || {};
+
+      /* 头像还没放好时用的内置占位图（灰色小人），与首页、说说页是同一张 */
+      var FALLBACK_AVATAR = 'data:image/svg+xml;charset=utf-8,%3Csvg%20xmlns=%27http://www.w3.org/2000/svg%27%20viewBox=%270%200%2096%2096%27%3E%3Crect%20width=%2796%27%20height=%2796%27%20fill=%27%23e2e8f0%27/%3E%3Ccircle%20cx=%2748%27%20cy=%2738%27%20r=%2715%27%20fill=%27%2394a3b8%27/%3E%3Cpath%20d=%27M16%2096c0-18%2014-30%2032-30s32%2012%2032%2030z%27%20fill=%27%2394a3b8%27/%3E%3C/svg%3E';
+
+      var avatarEl = document.getElementById('about-avatar');
+      var nameEl   = document.getElementById('about-name');
+
+      if (nameEl && owner.name) nameEl.textContent = owner.name;
+
+      if (avatarEl) {
+        avatarEl.alt = (owner.name || '') + ' 的头像';
+        avatarEl.src = owner.avatar || FALLBACK_AVATAR;
+        // 头像文件缺失时退回内置占位图，不出现裂图
+        avatarEl.onerror = function () { this.onerror = null; this.src = FALLBACK_AVATAR; };
+      }
+    })();
+  </script>
+
+  <!-- ================================================================
+       分段切换条：点「自我介绍 / 研究兴趣」切换下面那一栏
+       ----------------------------------------------------------------
+       · 用 hidden 属性控制显示，所以没有 JS 时只会看到第一栏，不会空白；
+       · 支持键盘：Tab 聚焦到按钮上后，用 ← / → 也能切换。
+       ================================================================ -->
+  <script>
+    (function () {
+      'use strict';
+
+      var tabs = [].slice.call(document.querySelectorAll('.about-tab'));
+      if (!tabs.length) return;
+
+      function select(tab) {
+        tabs.forEach(function (t) {
+          var on    = (t === tab);
+          var panel = document.getElementById(t.getAttribute('aria-controls'));
+          t.classList.toggle('is-active', on);
+          t.setAttribute('aria-selected', on ? 'true' : 'false');
+          if (panel) panel.hidden = !on;
+        });
+      }
+
+      tabs.forEach(function (t) {
+        t.addEventListener('click', function () { select(t); });
+
+        t.addEventListener('keydown', function (e) {
+          if (e.key !== 'ArrowRight' && e.key !== 'ArrowLeft') return;
+          e.preventDefault();
+          var i    = tabs.indexOf(t);
+          var next = tabs[(i + (e.key === 'ArrowRight' ? 1 : tabs.length - 1)) % tabs.length];
+          next.focus();
+          select(next);
+        });
+      });
+    })();
+  </script>
+
+</body>
+</html>

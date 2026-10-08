@@ -1,0 +1,281 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>随笔 · KngJack的个人主页</title>
+  <meta name="description" content="KngJack 的随笔列表">
+
+  <script>
+    (function () {
+      var theme = 'dark';                       // 默认深色；想默认浅色改成 'light'
+      try {
+        var saved = localStorage.getItem('theme');
+        if (saved === 'light' || saved === 'dark') theme = saved;
+      } catch (e) {}
+      document.documentElement.setAttribute('data-theme', theme);
+    })();
+  </script>
+
+  <link rel="stylesheet" href="style.css">
+
+  <!-- ================================================================
+       随笔列表页：这个文件平时不用改。
+       条目内容在：
+         essays/essays.js        有哪些随笔、按什么顺序
+         essays/e-N/meta.js      第 N 条的标题 / 日期 / 摘要（这一页显示的东西）
+         essays/e-N/index.html   第 N 条的正文（点标题后打开的页面）
+       本页可调参数只有一个（文件末尾脚本开头的 ★ 处）：
+         ★ ITEMS_PER_PAGE   每页显示几篇（现在是 5）
+       样式（卡片、条目排版、翻页条、手机端折行）：style.css 第十三节。
+       ================================================================ -->
+</head>
+
+<body data-page="essays">   <!-- 决定背景用 assets/bg-essays.jpg -->
+
+  <div class="bg-image" aria-hidden="true"></div>
+  <div class="bg-overlay" aria-hidden="true"></div>
+
+  <header class="site-header">
+    <div class="header-inner">
+      <a class="site-title" href="index.html">KngJack的个人主页</a>
+
+      <div class="header-right">
+        <nav class="site-nav">
+          <a href="index.html">首页</a>
+          <a href="papers.html">论文</a>
+          <a href="essays.html" class="active" aria-current="page">随笔<span class="nav-dot" aria-hidden="true"></span></a>
+          <a href="photowall.html">照片墙</a>
+          <a href="moments.html">说说</a>
+          <a href="about.html">关于</a>
+        </nav>
+
+        <button class="theme-toggle" type="button"
+                aria-label="切换到浅色模式" title="切换到浅色模式">
+          <svg class="icon-sun" viewBox="0 0 24 24" aria-hidden="true">
+            <circle cx="12" cy="12" r="5"/>
+            <line x1="12" y1="1"  x2="12" y2="3"/>
+            <line x1="12" y1="21" x2="12" y2="23"/>
+            <line x1="4.22" y1="4.22"   x2="5.64" y2="5.64"/>
+            <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/>
+            <line x1="1" y1="12" x2="3"  y2="12"/>
+            <line x1="21" y1="12" x2="23" y2="12"/>
+            <line x1="4.22" y1="19.78"  x2="5.64" y2="18.36"/>
+            <line x1="18.36" y1="5.64"  x2="19.78" y2="4.22"/>
+          </svg>
+          <svg class="icon-moon" viewBox="0 0 24 24" aria-hidden="true">
+            <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>
+          </svg>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <main class="doc-page">
+    <article class="glass-card list-card">
+
+      <div class="list-head">
+        <h1>随笔</h1>
+        <p>学习的记录与个人的一些思考</p>
+        <p class="list-loading" id="list-loading">正在加载…</p>
+      </div>
+
+      <!-- 条目由脚本按 essays/essays.js 的顺序生成，不用手写 -->
+      <div id="list-items"></div>
+
+      <!-- 翻页条：条目数超过"每页几篇"（★ ITEMS_PER_PAGE）时才出现，
+           只有一页时会自动隐藏。
+           翻页：两侧按钮；跳转：输入页码后点"跳转"或按回车（越界自动夹住）。 -->
+      <div class="pager" id="list-pager" hidden>
+        <button class="pager-btn" id="list-pager-prev" type="button">← 上一页</button>
+        <span class="pager-info" id="list-pager-info">第 1 / 1 页</span>
+        <span class="pager-jump">
+          跳至
+          <input class="pager-input" id="list-pager-input" type="number" min="1" value="1" inputmode="numeric" aria-label="跳转到第几页">
+          页
+        </span>
+        <button class="pager-btn" id="list-pager-go" type="button">跳转</button>
+        <button class="pager-btn" id="list-pager-next" type="button">下一页 →</button>
+      </div>
+
+    </article>
+  </main>
+
+  <script src="script.js"></script>
+
+  <!-- 随笔目录：里面写着有哪些文件夹、按什么顺序显示 -->
+  <script src="essays/essays.js"></script>
+
+  <!-- ================================================================
+       随笔列表逻辑（加载数据、列表、翻页）
+       ----------------------------------------------------------------
+       · 条目信息来自 essays/e-N/meta.js；
+         "标题"是一个链接，点它打开 essays/e-N/index.html 看正文；
+       · ★ 每页几篇：改下面的 ITEMS_PER_PAGE；
+       · 先把所有 meta.js 加载完，最后才读 window.ESSAY_DATA。
+       ================================================================ -->
+  <script>
+    (function () {
+      'use strict';
+
+      /* ===================== ★ 参数（可改） ===================== */
+      var ESSAY_DIR      = 'essays/';   // 随笔所在目录（不用改）
+      var ITEMS_PER_PAGE = 5;           // ★ 每页显示几篇随笔
+      var LOAD_TIMEOUT   = 6000;        // 保险：最多等多久就先渲染（不用改）
+
+      /* ===================== 元素引用（不用改） ===================== */
+      var itemsEl    = document.getElementById('list-items');
+      var loadingEl  = document.getElementById('list-loading');
+      var pagerEl    = document.getElementById('list-pager');
+      var pagerPrev  = document.getElementById('list-pager-prev');
+      var pagerNext  = document.getElementById('list-pager-next');
+      var pagerInfo  = document.getElementById('list-pager-info');
+      var pagerInput = document.getElementById('list-pager-input');
+      var pagerGo    = document.getElementById('list-pager-go');
+
+      /* ===================== 加载数据 ===================== */
+      var folders       = (window.ESSAY_FOLDERS || []).slice();
+      var essays        = [];
+      var loadedCount   = 0;
+      var rendered      = false;
+      var failedFolders = [];
+      var itemPage      = 0;
+
+      function pageCount() {
+        return Math.max(1, Math.ceil(essays.length / ITEMS_PER_PAGE));
+      }
+
+      function finishLoading() {
+        if (rendered) return;
+        rendered = true;
+
+        var dataMap = window.ESSAY_DATA || {};   // ★ 必须此时才读
+        var missing = [];
+
+        folders.forEach(function (folder) {
+          var d = dataMap[folder];
+          if (!d) missing.push(folder);
+          essays.push({
+            folder:  folder,
+            title:   (d && d.title)   || ('（没有读到 ' + ESSAY_DIR + folder + '/meta.js）'),
+            date:    (d && d.date)    || '',
+            meta:    (d && d.meta)    || '',
+            summary: (d && d.summary) || ''
+          });
+        });
+
+        if (loadingEl) loadingEl.hidden = true;
+
+        if (missing.length || failedFolders.length) {
+          console.warn('[随笔] 没读到数据的文件夹：' + (missing.join(', ') || '（无）') +
+                       (failedFolders.length ? '；加载失败的文件：' + failedFolders.join(', ') : ''));
+        }
+
+        itemPage = Math.min(Math.max(itemPage, 0), pageCount() - 1);
+        renderItems();
+      }
+
+      if (!folders.length) {
+        if (loadingEl) {
+          loadingEl.textContent = '还没有随笔。请先创建 ' + ESSAY_DIR + 'essays.js（目录）与 ' + ESSAY_DIR + 'e-1/meta.js（内容）。';
+        }
+      } else {
+        folders.forEach(function (folder) {
+          var s = document.createElement('script');
+          s.src = ESSAY_DIR + folder + '/meta.js';
+          var done = function () {
+            loadedCount++;
+            if (loadedCount >= folders.length) finishLoading();
+          };
+          s.onload  = done;
+          s.onerror = function () { failedFolders.push(folder); done(); };
+          document.head.appendChild(s);
+        });
+        setTimeout(finishLoading, LOAD_TIMEOUT);
+      }
+
+      /* ===================== 列表 + 翻页 ===================== */
+      function renderItems() {
+        itemsEl.innerHTML = '';
+        var start = itemPage * ITEMS_PER_PAGE;
+        var end   = Math.min(start + ITEMS_PER_PAGE, essays.length);
+        essays.slice(start, end).forEach(function (p) { itemsEl.appendChild(buildItem(p)); });
+        updatePager();
+      }
+
+      function updatePager() {
+        var pages = pageCount();
+        if (pages <= 1) { pagerEl.hidden = true; return; }
+
+        pagerEl.hidden = false;
+        pagerInfo.textContent = '第 ' + (itemPage + 1) + ' / ' + pages + ' 页';
+        pagerPrev.disabled = (itemPage === 0);
+        pagerNext.disabled = (itemPage === pages - 1);
+        pagerInput.max = pages;
+        if (document.activeElement !== pagerInput) pagerInput.value = itemPage + 1;
+      }
+
+      function gotoPage(p) {
+        itemPage = Math.min(Math.max(p, 0), pageCount() - 1);
+        renderItems();
+        window.scrollTo(0, 0);
+      }
+
+      pagerPrev.addEventListener('click', function () { gotoPage(itemPage - 1); });
+      pagerNext.addEventListener('click', function () { gotoPage(itemPage + 1); });
+
+      (function bindPageJump() {
+        function jump() {
+          var v = parseInt(pagerInput.value, 10);
+          if (isNaN(v)) { pagerInput.value = ''; return; }
+          gotoPage(v - 1);
+          if (document.activeElement === pagerInput) pagerInput.blur();
+        }
+        pagerGo.addEventListener('click', jump);
+        pagerInput.addEventListener('keydown', function (e) {
+          if (e.key === 'Enter') { e.preventDefault(); jump(); }
+        });
+      })();
+
+      /* ===================== 造一条条目 =====================
+         随笔一般没有"作者 · 出处"，meta.js 里不写 meta 这一行即可。 */
+      function buildItem(p) {
+        var row = document.createElement('div');
+        row.className = 'list-item';
+
+        var date = document.createElement('div');
+        date.className = 'item-date';
+        date.textContent = p.date;
+
+        var main = document.createElement('div');
+        main.className = 'item-main';
+
+        var title = document.createElement('a');
+        title.className = 'item-title';
+        title.href = ESSAY_DIR + p.folder + '/index.html';   // ★ 点标题进正文
+        title.textContent = p.title;
+        main.appendChild(title);
+
+        if (p.meta) {
+          var meta = document.createElement('p');
+          meta.className = 'item-meta';
+          meta.textContent = p.meta;
+          main.appendChild(meta);
+        }
+
+        if (p.summary) {
+          var sum = document.createElement('p');
+          sum.className = 'item-summary';
+          sum.textContent = p.summary;
+          main.appendChild(sum);
+        }
+
+        row.appendChild(date);
+        row.appendChild(main);
+        return row;
+      }
+    })();
+  </script>
+
+</body>
+</html>
