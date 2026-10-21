@@ -73,6 +73,7 @@
   --stat-1: #818cf8;            /* 论文，靛蓝 */
   --stat-2: #c084fc;            /* 随笔，紫 */
   --stat-3: #f472b6;            /* 照片，粉 */
+  --stat-4: #ff71e0;            /* 说说，粉 */
 
   /* ---- 尺寸 ---- */
   --card-radius: 24px;    /* 卡片圆角 */
@@ -115,6 +116,7 @@
   --stat-1: #4f46e5;
   --stat-2: #9333ea;
   --stat-3: #db2777;
+  --stat-4: #df20df;
 }
 
 /* ================================================================
@@ -433,6 +435,7 @@ a { text-decoration: none; }
 .stat-1 .stat-num { color: var(--stat-1); }
 .stat-2 .stat-num { color: var(--stat-2); }
 .stat-3 .stat-num { color: var(--stat-3); }
+.stat-4 .stat-num { color: var(--stat-4); }
 
 /* 统计之间的竖线：只在桌面端显示 */
 .stat-divider {

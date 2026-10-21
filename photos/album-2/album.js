@@ -10,11 +10,14 @@
    · 封面自动取 photos 里的第一张，不用单独指定。 */
 window.ALBUM_DATA = window.ALBUM_DATA || {};
 window.ALBUM_DATA['album-2'] = {
-  title: '相册一（占位标题）',
-  date:  '2026-05-07',
-  desc:  '这里是相册的一句话描述，先放着占位文字。',
+  title: '夕阳与夜晚',
+  date:  '2026-10-21',
+  desc:  ' ',
   photos: [
-    { file: '1.jpg', caption: '照片说明一（占位）' },
-    { file: '2.jpg', caption: '照片说明二（占位）' }
+    { file: '2.jpg', caption: '' },
+    { file: '3.jpg', caption: '' },
+    { file: '4.jpg', caption: '' },
+    { file: '5.jpg', caption: '' },
+    { file: '6.jpg', caption: '' }
   ]
 };

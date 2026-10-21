@@ -4,7 +4,7 @@
      （具体几张由下面的 images 决定，这里写 3 就用到 1.jpg~3.jpg） */
 window.MOMENT_DATA = window.MOMENT_DATA || {};
 window.MOMENT_DATA['m-2'] = {
-  date: '2026-05-07 15:06',
-  text: '占位正文（第一条）。\n换行会原样显示，所以可以这样分行。\n\n这是第二段——正文直接写在这里就行。',
-  images: 0      // 数字 = 用 1.jpg、2.jpg、3.jpg；也可以写成 ['a.jpg', 'b.png']
+  date: '2026-10-21 22:28',
+  text: '花开花落又是一季。',
+  images: 2      // 数字 = 用 1.jpg、2.jpg、3.jpg；也可以写成 ['a.jpg', 'b.png']
 };
